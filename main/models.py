@@ -44,6 +44,10 @@ class Issue(models.Model):
     last_modified_at = models.DateTimeField(auto_now=True)
     closed_at = models.DateTimeField(blank=True, null=True, db_index=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__original_status = self.status
+
     def __str__(self):
         return self.title
 
@@ -52,7 +56,6 @@ class Issue(models.Model):
         Assigns current datetime to self.closed_at,
         change status to 'Closed, verified' and save to DB.
         """
-        self.closed_at = datetime.datetime.now()
         self.status = STATUSES['Closed, verified']
         self.save()
 
@@ -61,7 +64,6 @@ class Issue(models.Model):
         Assigns current datetime to self.closed_at,
         change status to 'Closed, not verified' and save to DB.
         """
-        self.closed_at = datetime.datetime.now()
         self.status = STATUSES['Closed, verified']
         self.save()
 
@@ -71,3 +73,13 @@ class Issue(models.Model):
         """
         self.status = STATUSES['Open']
         self.save()
+
+    def save(self, *args, **kwargs):
+        # Assigning current datetime to closed_at if status changed
+        # from anything to Closed.
+        closed_statuses = [
+            STATUSES['Closed, verified'], STATUSES['Closed, not verified']]
+        if (self.status in closed_statuses and
+                self.status != self.__original_status):
+            self.closed_at = datetime.datetime.now()
+        super().save(*args, **kwargs)
