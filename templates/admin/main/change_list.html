@@ -1,0 +1,16 @@
+{% extends "admin/change_list.html" %}
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs" style="font-size: 20px;">
+  <span style="padding: 4px 10px; text-decoration: underline; color: #ffffff;">Issues</span>
+  {% if user.is_superuser %}<a href="{% url 'admin:auth_user_changelist' %}"><span style="padding: 4px 10px; color: #c4dce8;">Users</span></a>{% endif %}
+</div>
+{% endblock %}
+{% endif %}
+{% block pretitle %}
+<div style="margin-bottom: 1.2em;">
+{% for key, val in statistics.items %}
+  <p style="display: inline-block; padding-right: 2em;">{{ key }}: {{ val }}</li>
+{% endfor %}
+</div>
+{% endblock %}

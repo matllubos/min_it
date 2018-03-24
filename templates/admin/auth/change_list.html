@@ -1,0 +1,9 @@
+{% extends "admin/change_list.html" %}
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs" style="font-size: 20px;">
+  <a href="{% url 'admin:main_issue_changelist' %}"><span style="padding: 4px 10px; text-decoration: underline; color: #c4dce8;">Issues</span></a>
+  <span style="padding: 4px 10px; color: #ffffff;">Users</span>
+</div>
+{% endblock %}
+{% endif %}
