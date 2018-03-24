@@ -1,9 +1,10 @@
 from django import http
 from django.contrib import admin
 from django.contrib import auth
+from django.db.models import Q
 from django.urls import path
 
-from .models import Issue
+from . import models
 
 class AdminSite(admin.AdminSite):
     index_title = ''
@@ -71,8 +72,68 @@ class IssueAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
         extra_context['title'] = 'List of issues'
+        extra_context['statistics'] = self.get_statistics()
         return super().changelist_view(request, extra_context)
 
+    def get_statistics(self):
+        """
+        Calculating some stats data.
+        The calculation is performed on every request, therefore this method
+        is not very efficient. Consider adding auxilary model
+        to store statistics in the DB for better performance.
+        """
+        def seconds_to_human_str(t_seconds):
+            """
+            Convert total seconds into human readable format
+            x days, y hours, z minutes
+            """
+            t_seconds = int(t_seconds)
+            days, remainder = divmod(t_seconds, 24*60*60)
+            hours, remainder = divmod(remainder, 60*60)
+            minutes, _ = divmod(remainder, 60)
+            result = ''
+            if days == 1:
+                result += '1 day '
+            elif days > 1:
+                result += '%s days ' % days
+            if hours == 1:
+                result += '1 hour '
+            elif hours > 1:
+                result += '%s hours ' % hours
+            if minutes == 1:
+                result += '1 minute'
+            elif minutes > 1:
+                result += '%s minutes' % minutes
+            return result
+
+        closed_issues = models.Issue.objects.filter(
+            Q(status=models.STATUSES['Closed, verified']) |
+            Q(status=models.STATUSES['Closed, not verified']))
+        # Calculating resolution time of all closed bugs in seconds
+        resolution_time_list = [
+            (issue.closed_at - issue.filed_at).total_seconds()
+            for issue in closed_issues]
+        if resolution_time_list:
+            min_resolution_time = seconds_to_human_str(min(resolution_time_list))
+            max_resolution_time = seconds_to_human_str(max(resolution_time_list))
+            avg_resolution_time = seconds_to_human_str(
+                sum(resolution_time_list) / len(resolution_time_list))
+        else:
+            min_resolution_time = '-'
+            max_resolution_time = '-'
+            avg_resolution_time = '-'
+        return {
+            'Total issues': models.Issue.objects.all().count(),
+            'Number of open issues': models.Issue.objects.filter(
+                status=models.STATUSES['Open']).count(),
+            'Number of closed issues': closed_issues.count(),
+            'Number of WIP issues': models.Issue.objects.filter(
+                status=models.STATUSES['Work in progress']).count(),
+            'Min resolution time': min_resolution_time,
+            'Max resolution time': max_resolution_time,
+            'Average resolution time': avg_resolution_time,
+        }
+
 admin_site = AdminSite()
-admin_site.register(Issue, IssueAdmin)
+admin_site.register(models.Issue, IssueAdmin)
 admin_site.register(auth.admin.User, UserAdmin)
