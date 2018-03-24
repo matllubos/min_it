@@ -19,8 +19,20 @@ from django.urls import resolvers
 
 from main.admin import admin_site
 from main.views import index_view
+from copy import copy
+
+# Patching admin URLs
+new_patterns = copy(admin_site.urls[0])
+for idx, elem in enumerate(new_patterns):
+    if isinstance(elem, resolvers.URLResolver):
+        if getattr(elem.pattern, '_route') == 'auth/user/':
+            setattr(elem.pattern, '_route', 'users/')
+        elif getattr(elem.pattern, '_route') == 'main/issue/':
+            setattr(elem.pattern, '_route', 'issues/')
+            issues_view = elem.url_patterns[0].callback
+new_patterns[0].callback = issues_view
 
 urlpatterns = [
     path('', index_view, name='index'),
-    path('', admin_site.urls),
+    path('', (new_patterns, 'admin', 'admin')),
 ]
