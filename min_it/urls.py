@@ -18,7 +18,9 @@ from django.urls import path
 from django.urls import resolvers
 
 from main.admin import admin_site
+from main.views import index_view
 
 urlpatterns = [
+    path('', index_view, name='index'),
     path('', admin_site.urls),
 ]
