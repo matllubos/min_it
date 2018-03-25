@@ -40,7 +40,7 @@ class Command(BaseCommand):
             username = 'staffuser%s' % idx
             password = 'staffuser%s' % idx
             user_model.objects.create_user(
-                username, password, is_staff=True)
+                username=username, password=password, is_staff=True)
         self.stdout.write('Added %s staff-user(s).' % options['num_staffusers'])
         superuser_ids = user_model.objects.filter(
             is_active=True, is_superuser=True).values_list('id', flat=True)
