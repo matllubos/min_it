@@ -34,7 +34,8 @@ class Command(BaseCommand):
             username = 'adminuser%s' % idx
             password = 'adminuser%s' % idx
             user_model.objects.create_user(
-                username, password, is_staff=True, is_superuser=True)
+                username=username, password=password,
+                is_staff=True, is_superuser=True)
         self.stdout.write('Added %s super-user(s).' % options['num_superusers'])
         for idx in range(1, 1+options['num_staffusers']):
             username = 'staffuser%s' % idx
