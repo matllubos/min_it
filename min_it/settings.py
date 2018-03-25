@@ -17,8 +17,9 @@ PROJECT_NAME = 'min_it'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Used to store variable data (e.g. DB-files, media, etc)
 BASE_DIR_VAR = os.path.expanduser(os.path.join('~', '.' + PROJECT_NAME))
+WEBSITE_DATA_DIR = os.path.join(BASE_DIR_VAR, 'website_data')
 try:
-    os.makedirs(BASE_DIR_VAR)
+    os.makedirs(WEBSITE_DATA_DIR)
 except IOError:
     pass
 
@@ -34,7 +35,7 @@ SECRET_KEY = 'p(k)0%6ej+@np477pg@^6janzv=&42o^_*n&_c1o5#p@29fiow'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -123,8 +124,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+FIXTURE_DIRS = [os.path.join(BASE_DIR), 'fixtures']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
-
+STATIC_ROOT = os.path.join(WEBSITE_DATA_DIR, 'static/')
 STATIC_URL = '/static/'
